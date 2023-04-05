@@ -45,6 +45,14 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "baf1de4339761588bc0619e3cbc0120ee582ebb74b53b4efbf79117bd2da40fd"
 
 [[package]]
+name = "clinews"
+version = "0.1.0"
+dependencies = [
+ "colour",
+ "newsapi",
+]
+
+[[package]]
 name = "colour"
 version = "0.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -178,6 +186,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "newsapi"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "serde_json",
+ "ureq",
+]
+
+[[package]]
 name = "once_cell"
 version = "1.17.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -252,16 +269,6 @@ dependencies = [
  "untrusted",
  "web-sys",
  "winapi",
-]
-
-[[package]]
-name = "rust-news-app-cli"
-version = "0.1.0"
-dependencies = [
- "colour",
- "serde",
- "serde_json",
- "ureq",
 ]
 
 [[package]]
