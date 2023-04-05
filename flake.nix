@@ -8,6 +8,14 @@
       pkgs = nixpkgs.legacyPackages.${system};
     in
       {
+        packages.${system}.default = pkgs.rustPlatform.buildRustPackage {
+          pname = "clinews";
+          version = "1.0.0";
+          src = ./.;
+          cargoLock = {
+            lockFile = ./Cargo.lock;
+          };
+        };
         devShells.${system}.default = pkgs.mkShell {
           buildInputs = with pkgs; [
             cargo
