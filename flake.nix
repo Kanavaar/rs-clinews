@@ -17,6 +17,9 @@
           };
         };
         devShells.${system}.default = pkgs.mkShell {
+          packages = with pkgs; [
+            bacon
+          ];
           buildInputs = with pkgs; [
             cargo
           ];
