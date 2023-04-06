@@ -29,7 +29,8 @@ pub fn get_articles(url: &str, api_key: &str) -> Result<Articles, NewsApiError> 
         .into_string()
         .map_err(|e| NewsApiError::FailedParseString(Box::new(e)))?;
     
-    let articles: Articles = serde_json::from_str(&res).map_err(|e| NewsApiError::FailedJsonFromString(Box::new(e)))?;
+    let articles: Articles = serde_json::from_str(&res)
+        .map_err(|e| NewsApiError::FailedJsonFromString(Box::new(e)))?;
 
     Ok(articles)
 }
