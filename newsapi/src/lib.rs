@@ -6,18 +6,28 @@ const BASE_URL: &str = "https://newsapi.org/v2";
 #[derive(thiserror::Error, Debug)]
 pub enum NewsApiError {
     #[error("Could not establish connection to newsapi")]
-    RequestFailed(Box<ureq::Error>),
+    RequestFailed(#[from]ureq::Error),
     #[error("Failed parsing respons to string")]
-    FailedParseString(Box<std::io::Error>),
+    FailedParseString(#[from]std::io::Error),
     #[error("Failed to create json from string")]
-    FailedJsonFromString(Box<serde_json::Error>),
+    FailedJsonFromString(#[from]serde_json::Error),
     #[error("Url parsing failed")]
-    FailedParseUrl(#[from]url::ParseError)
+    FailedParseUrl(#[from]url::ParseError),
+    #[error("Request failed : {0}")]
+    BadRequest(&'static str),
 }
 
 #[derive(Deserialize, Debug)]
-pub struct Articles {
-    pub articles: Vec<Article>
+pub struct NewsApiResponse {
+    status: String,
+    pub articles: Vec<Article>,
+    code: Option<String>,
+}
+
+impl NewsApiResponse {
+    pub fn articles(&self) -> &Vec<Article> {
+        &self.articles
+    }
 }
 
 #[derive(Deserialize, Debug)]
@@ -26,21 +36,21 @@ pub struct Article {
     pub url: String,
 }
 
-pub fn get_articles(url: &str, api_key: &str) -> Result<Articles, NewsApiError> {
-    let res: String = ureq::get(url)
-        .set("X-Api-Key", api_key)
-        .call()
-        .map_err(|e| NewsApiError::RequestFailed(Box::new(e)))?
-        .into_string()
-        .map_err(|e| NewsApiError::FailedParseString(Box::new(e)))?;
+// pub fn get_articles(url: &str, api_key: &str) -> Result<Articles, NewsApiError> {
+//     let res: String = ureq::get(url)
+//         .set("X-Api-Key", api_key)
+//         .call()
+//         .map_err(|e| NewsApiError::RequestFailed(Box::new(e)))?
+//         .into_string()
+//         .map_err(|e| NewsApiError::FailedParseString(Box::new(e)))?;
     
-    let articles: Articles = serde_json::from_str(&res)
-        .map_err(|e| NewsApiError::FailedJsonFromString(Box::new(e)))?;
+//     let articles: Articles = serde_json::from_str(&res)
+//         .map_err(|e| NewsApiError::FailedJsonFromString(Box::new(e)))?;
 
-    Ok(articles)
-}
+//     Ok(articles)
+// }
 
-enum Endpoint {
+pub enum Endpoint {
     TopHeadlines,
 }
 
@@ -61,19 +71,19 @@ impl ToString for Country {
     }
 }
 
-enum Country {
+pub enum Country {
     Us,
     De,
 }
 
-struct NewsApi {
+pub struct NewsApi {
     api_key: String,
     endpoint: Endpoint,
     country: Country,
 }
 
 impl NewsApi {
-    fn new(api_key: &str) -> NewsApi {
+    pub fn new(api_key: &str) -> NewsApi {
         NewsApi {
             api_key: api_key.to_string(),
             endpoint: Endpoint::TopHeadlines,
@@ -81,12 +91,12 @@ impl NewsApi {
         }
     }
 
-    fn country(&mut self, country: Country) -> &mut NewsApi {
+    pub fn country(&mut self, country: Country) -> &mut NewsApi {
         self.country = country;
         self
     }
 
-    fn endpoint(&mut self, endpoint: Endpoint) -> &mut NewsApi {
+    pub fn endpoint(&mut self, endpoint: Endpoint) -> &mut NewsApi {
         self.endpoint = endpoint;
         self
     }
@@ -99,5 +109,28 @@ impl NewsApi {
         url.set_query(Some(&country));
         
         Ok(url.to_string())
+    }
+
+    pub fn fetch(&self) -> Result<NewsApiResponse, NewsApiError> {
+        let url = self.prepare_url()?;
+        let req = ureq::get(&url)
+            .set("X-Api-Key", &self.api_key);
+        let response: NewsApiResponse = req.call()?.into_json()?;
+
+        match response.status.as_str() {
+            "ok" => Ok(response),
+            _ => Err(map_response_err(response.code))
+        }
+    }
+}
+
+fn map_response_err(code: Option<String>) -> NewsApiError {
+    if let Some(code) = code {
+        match code.as_str() {
+            "apiKeyDisabled" => NewsApiError::BadRequest("Your api key has been disabled"),
+            _ => NewsApiError::BadRequest("Unknown Error"),
+        }
+    } else {
+        NewsApiError::BadRequest("Unknown Error")
     }
 }
