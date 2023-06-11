@@ -1,0 +1,14 @@
+inputSet:
+  name: Build_rs_clinews_1686493426638-push-trigger-input-set
+  identifier: Build_rs_clinews_1686493426638pushtriggerinputset
+  orgIdentifier: default
+  projectIdentifier: default_project
+  pipeline:
+    identifier: Build_rs_clinews_1686493426638
+    properties:
+      ci:
+        codebase:
+          build:
+            type: branch
+            spec:
+              branch: <+trigger.branch>
