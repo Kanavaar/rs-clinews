@@ -19,7 +19,7 @@ jobs:
           command: "apt-get update && apt-get install -y libssl-dev pkg-config"
       - run:
           name: "Check"
-          command: "cargo check"
+          command: "cargo clippy"
   build:
     docker:
       - image: docker.io/rust:slim-bookworm
