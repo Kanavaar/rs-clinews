@@ -2,7 +2,7 @@
 
 ## Ci Status
 
-[![CI](https://circleci.com/gh/Kanavaar/rs-clinews.svg?style=svg)](https://app.circleci.com/pipelines/github/kanavaar/rs-clinews)
+[![CI](https://circleci.com/gh/Kanavaar/rs-clinews.svg?style=svg)](https://app.circleci.com/pipelines/github/Kanavaar/rs-clinews)
 
 A cli program that shows the top headlines of newsapi for Germany
 
