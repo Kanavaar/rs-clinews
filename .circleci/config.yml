@@ -18,6 +18,9 @@ jobs:
           name: "Install dependencies"
           command: "apt-get update && apt-get install -y libssl-dev pkg-config"
       - run:
+          name: "Install Clippy"
+          command: "rustup component add clippy"
+      - run:
           name: "Check"
           command: "cargo clippy"
   build:
