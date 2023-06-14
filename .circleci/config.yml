@@ -5,22 +5,39 @@ version: 2.1
 # Define a job to be invoked later in a workflow.
 # See: https://circleci.com/docs/configuration-reference/#jobs
 jobs:
-  say-hello:
+  clippy:
     # Specify the execution environment. You can specify an image from Docker Hub or use one of our convenience images from CircleCI's Developer Hub.
     # See: https://circleci.com/docs/configuration-reference/#executor-job
     docker:
-      - image: cimg/base:stable
+      - image: docker.io/rust:slim-bookworm
     # Add steps to the job
     # See: https://circleci.com/docs/configuration-reference/#steps
     steps:
       - checkout
       - run:
-          name: "Say hello"
-          command: "echo Hello, World!"
+          name: "Install dependencies"
+          command: "apt-get install -y libssl-dev pkg-config"
+      - run:
+          name: "Check"
+          command: "cargo check"
+  build:
+    docker:
+      - image: docker.io/rust:slim-bookworm
+    steps:
+      - checkout
+      - run:
+          name: "Install dependencies"
+          command: "apt-get install -y libssl-dev pkg-config"
+      - run:
+          name: "Build"
+          command: "cargo build"
 
 # Orchestrate jobs using workflows
 # See: https://circleci.com/docs/configuration-reference/#workflows
 workflows:
-  say-hello-workflow:
+  check:
     jobs:
-      - say-hello
+      - check
+  build:
+    jobs:
+      - build
